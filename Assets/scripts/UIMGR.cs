@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,37 +8,50 @@ public class UIMGR : MonoBehaviour
     [SerializeField] Text stepsCounterText;
     [SerializeField] Text starsCounterText;
     [SerializeField] Text gameOverText;
-    [SerializeField] Button restartButton;
+    [SerializeField] ButtonHandler restartButton;
 
-    // Start is called before the first frame update
-    void Start()
+    public static Action RestartEvent;
+
+    private void OnEnable()
     {
-        gm.stepsCounterUpdateEvent.AddListener(updateSteps);
-        gm.starsCounterUpdateEvent.AddListener(updateStars);
-        gm.gameOverEvent.AddListener(gameOver);
-        restartButton.onClick.AddListener(gm.restart);
+        GameMGR.stepsCounterUpdateEvent += UpdateSteps;
+        GameMGR.starsCounterUpdateEvent += UpdateStars;
+        GameMGR.gameOverEvent += GameOver;
+        restartButton.onClick += OnRestart;
     }
 
-    private void updateSteps(int steps)
+    private void OnDisable()
+    {
+        GameMGR.stepsCounterUpdateEvent -= UpdateSteps;
+        GameMGR.starsCounterUpdateEvent -= UpdateStars;
+        GameMGR.gameOverEvent -= GameOver;
+        restartButton.onClick -= OnRestart;
+    }
+
+    void OnRestart()
+    {
+        RestartEvent?.Invoke();
+    }
+
+    private void UpdateSteps(int steps)
     {
         stepsCounterText.text = steps.ToString();
     }
-    private void updateStars(int stars)
+    private void UpdateStars(int stars)
     {
         starsCounterText.text = stars.ToString();
     }
 
-    private void gameOver(bool isWin)
+    private void GameOver(bool isWin)
     {
         if (isWin)
         {
-            gameOverText.text = "the player win";
+            gameOverText.text = "The player win";
         }
         else
         {
-            gameOverText.text = "the player lose";
+            gameOverText.text = "The player lose";
         }
-        //gameOverText.gameObject.SetActive(true);
         gameOverText.enabled = true;
     }
 }

@@ -14,22 +14,15 @@ public class MazeMaker: MonoBehaviour
     [SerializeField] TileBase playerTile;
     [SerializeField] TileBase starTile;
 
-    private Vector3Int startPos;
-    private Vector3Int endPos;
-    private int MAX_TRY_COUNTER = 100;
-    public Vector3Int getStartPos()
-    {
-        return startPos;
-    }
+    public Vector3Int startPos { get; private set; }
+    public Vector3Int endPos { get; private set; }
 
-    public Vector3Int getEndPos()
-    {
-        return endPos;
-    }
+    private int MAX_TRY_COUNTER = 100;
 
     private int MIN_HORIZONTAL_BORDER = -5, MAX_HORIZONTAL_BORDER = 5, MIN_VERTICAL_BORDER = -5, MAX_VERTICAL_BORDER = 5; // assuming min is negative
 
-    private Vector3Int getRandomValidPos()
+
+    private Vector3Int GetRandomValidPos()
     {
         Vector3Int res;
         do
@@ -37,12 +30,6 @@ public class MazeMaker: MonoBehaviour
             res = new Vector3Int(Random.Range(MIN_HORIZONTAL_BORDER, MAX_HORIZONTAL_BORDER), Random.Range(MIN_VERTICAL_BORDER, MAX_VERTICAL_BORDER), 0);
         } while (gameTiles.HasTile(res) || wallsAndLava.HasTile(res) || playerTiles.HasTile(res));
         return res;
-    }
-
-
-    private bool areVectorsEqual(Vector3Int posA, Vector3Int posB)
-    {
-        return posA.x == posB.x && posA.y == posB.y && posA.z == posB.z;
     }
 
     public TileTypes GetTileType(Vector3Int pos)
@@ -66,24 +53,24 @@ public class MazeMaker: MonoBehaviour
         return TileTypes.Empty;
     }
 
-    private bool isThereAWay(Vector3Int posA, Vector3Int posB)
+    private bool IsThereAWay(Vector3Int posA, Vector3Int posB)
     {
         var queue = new Queue<Vector3Int>();
         bool[,] visitMatrix = new bool[MAX_HORIZONTAL_BORDER - MIN_HORIZONTAL_BORDER - 1, MAX_VERTICAL_BORDER - MIN_VERTICAL_BORDER - 1];
-        markVisited(visitMatrix, posA);
+        MarkVisited(visitMatrix, posA);
         queue.Enqueue(posA);
         while (queue.Count > 0)
         {
             Vector3Int point = queue.Dequeue();
-            if (areVectorsEqual(point, posB))
+            if (point.Equals(posB))
             {
                 return true;
             }
-            foreach (Vector3Int pos in findAllLegalNaigbours(point, wallsAndLava))
+            foreach (Vector3Int pos in FindAllLegalNaigbours(point, wallsAndLava))
             {
                 if (!visitMatrix[pos.x - MIN_HORIZONTAL_BORDER, pos.y - MIN_VERTICAL_BORDER])
                 {
-                    markVisited(visitMatrix, pos);
+                    MarkVisited(visitMatrix, pos);
                     queue.Enqueue(pos);
                 }
             }
@@ -92,7 +79,7 @@ public class MazeMaker: MonoBehaviour
         return false;
     }
 
-    private List<Vector3Int> findAllLegalNaigbours(Vector3Int pos, Tilemap walls)
+    private List<Vector3Int> FindAllLegalNaigbours(Vector3Int pos, Tilemap walls)
     {
         List<Vector3Int> res = new List<Vector3Int>();
         Vector3Int naighbor = new Vector3Int(pos.x + 1, pos.y, 0);
@@ -117,35 +104,35 @@ public class MazeMaker: MonoBehaviour
         }
         return res;
     }
-    private void markVisited(bool[,] visitMatrix, Vector3Int pos)
+    private void MarkVisited(bool[,] visitMatrix, Vector3Int pos)
     {
         visitMatrix[pos.x - MIN_HORIZONTAL_BORDER, pos.y - MIN_VERTICAL_BORDER] = true;
     }
 
 
-    public void createMaze(int numOfWalls, int numOfLavaTiles, int numOfStars)
+    public void CreateMaze(int numOfWalls, int numOfLavaTiles, int numOfStars)
     {
-        startPos = getRandomValidPos();
+        startPos = GetRandomValidPos();
         playerTiles.SetTile(startPos, playerTile);
-        endPos = getRandomValidPos();
+        endPos = GetRandomValidPos();
         gameTiles.SetTile(endPos, endTile);
-        if(!placeObjects(wallTile, wallsAndLava, numOfWalls,false))
+        if(!PlaceObjects(wallTile, wallsAndLava, numOfWalls,false))
         {
             print("can not add more walls");
             return;
         }
-        if (!placeObjects(lavaTile, wallsAndLava, numOfLavaTiles, false))
+        if (!PlaceObjects(lavaTile, wallsAndLava, numOfLavaTiles, false))
         {
             print("can not add more lava");
             return;
         }
-        if (!placeObjects(starTile, gameTiles , numOfStars,true))
+        if (!PlaceObjects(starTile, gameTiles , numOfStars,true))
         {
             print("can not add more stars");
             return;
         }
     }
-private bool placeObjects(TileBase tile, Tilemap tileMap,int numOfObjects, bool isCollectable)
+private bool PlaceObjects(TileBase tile, Tilemap tileMap,int numOfObjects, bool isCollectable)
     {
         int tryCounter = 0;
         int objectsPlaced = 0;
@@ -156,8 +143,8 @@ private bool placeObjects(TileBase tile, Tilemap tileMap,int numOfObjects, bool 
                 return false;
             }
             tryCounter++;
-            Vector3Int targetPos = getRandomValidPos();
-            if (tryPlace(targetPos, tileMap, tile, isCollectable))
+            Vector3Int targetPos = GetRandomValidPos();
+            if (TryPlace(targetPos, tileMap, tile, isCollectable))
             {
                 objectsPlaced++;
             }
@@ -165,19 +152,19 @@ private bool placeObjects(TileBase tile, Tilemap tileMap,int numOfObjects, bool 
         return true;
     }
 
-    private bool tryPlace(Vector3Int pos, Tilemap board, TileBase tile, bool isCollectable)
+    private bool TryPlace(Vector3Int pos, Tilemap board, TileBase tile, bool isCollectable)
     {
         board.SetTile(pos, tile);
         if (isCollectable)
         {
-            if (isThereAWay(startPos, pos))
+            if (IsThereAWay(startPos, pos))
             {
                 return true;
             }
         }
         else
         {
-            if (isThereAWay(startPos, endPos))
+            if (IsThereAWay(startPos, endPos))
             {
                 return true;
             }
