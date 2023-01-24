@@ -9,6 +9,9 @@ public class UIMGR : MonoBehaviour
     [SerializeField] Text starsCounterText;
     [SerializeField] Text gameOverText;
     [SerializeField] ButtonHandler restartButton;
+    [SerializeField] ButtonHandler settingsButton;
+    [SerializeField] ButtonHandler backButton;
+    [SerializeField] GameObject SettingsManu;
 
     public static Action RestartEvent;
 
@@ -18,6 +21,20 @@ public class UIMGR : MonoBehaviour
         GameMGR.starsCounterUpdateEvent += UpdateStars;
         GameMGR.gameOverEvent += GameOver;
         restartButton.onClick += OnRestart;
+        settingsButton.onClick += OnSettingsClick;
+        backButton.onClick += OnBackClick;
+    }
+
+    private void OnSettingsClick()
+    {
+        restartButton.gameObject.SetActive(false);
+        SettingsManu.SetActive(true);
+    }
+
+    private void OnBackClick()
+    {
+        restartButton.gameObject.SetActive(true);
+        SettingsManu.SetActive(false);
     }
 
     private void OnDisable()
@@ -26,6 +43,8 @@ public class UIMGR : MonoBehaviour
         GameMGR.starsCounterUpdateEvent -= UpdateStars;
         GameMGR.gameOverEvent -= GameOver;
         restartButton.onClick -= OnRestart;
+        settingsButton.onClick -= OnSettingsClick;
+        backButton.onClick -= OnBackClick;
     }
 
     void OnRestart()
@@ -52,6 +71,6 @@ public class UIMGR : MonoBehaviour
         {
             gameOverText.text = "The player lose";
         }
-        gameOverText.enabled = true;
+        gameOverText.transform.parent.gameObject.SetActive(true);
     }
 }

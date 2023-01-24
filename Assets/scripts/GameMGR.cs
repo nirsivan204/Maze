@@ -28,6 +28,7 @@ public class GameMGR : MonoBehaviour
     {
         maze.CreateMaze(numOfWallTiles, numOfLavaTiles, numOfStars);
         _playerPos = maze.startPos;
+        AudioManager.Instance.PlaySound(SoundType.BG_Music, true);
     }
 
     private void OnEnable()
@@ -42,7 +43,7 @@ public class GameMGR : MonoBehaviour
 
     public void Restart()
     {
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene((int)Scenes.GameScene);
     }
 
     private void TryMove(Vector3Int movement)
@@ -61,15 +62,21 @@ public class GameMGR : MonoBehaviour
                 case TileTypes.Lava:
                     _isGameOver = true;
                     gameOverEvent?.Invoke(false);
+                    AudioManager.Instance.PlaySound(SoundType.Lose);
                     break;
                 case TileTypes.Star:
                     _numOfStarsCollected++;
                     starsCounterUpdateEvent?.Invoke(_numOfStarsCollected);
                     gameTiles.SetTile(_playerPos, null);
+                    AudioManager.Instance.PlaySound(SoundType.StarCollect);
                     break;
                 case TileTypes.End:
                     _isGameOver = true;
                     gameOverEvent?.Invoke(true);
+                    AudioManager.Instance.PlaySound(SoundType.Win);
+                    break;
+                default:
+                    AudioManager.Instance.PlaySound(SoundType.Move);
                     break;
             }
         }

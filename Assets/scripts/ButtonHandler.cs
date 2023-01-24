@@ -42,6 +42,7 @@ public class ButtonHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!isActive) return;
+        AudioManager.Instance.PlaySound(SoundType.Click);
         onClick?.Invoke();
     }
 
