@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Random = UnityEngine.Random;
 
 public class MazeMaker: MonoBehaviour
 {
@@ -118,18 +120,15 @@ public class MazeMaker: MonoBehaviour
         gameTiles.SetTile(endPos, endTile);
         if(!PlaceObjects(wallTile, wallsAndLava, numOfWalls,false))
         {
-            print("can not add more walls");
-            return;
+            throw new Exception("Can not add more walls");
         }
         if (!PlaceObjects(lavaTile, wallsAndLava, numOfLavaTiles, false))
         {
-            print("can not add more lava");
-            return;
+            throw new Exception("Can not add more lava");
         }
         if (!PlaceObjects(starTile, gameTiles , numOfStars,true))
         {
-            print("can not add more stars");
-            return;
+            throw new Exception("Can not add more stars");
         }
     }
 private bool PlaceObjects(TileBase tile, Tilemap tileMap,int numOfObjects, bool isCollectable)
